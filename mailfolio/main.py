@@ -39,6 +39,10 @@ def _rate_limit(key: str) -> str:
     return app.state.settings.rate_limit
 
 
+def _is_rate_limit_disabled() -> bool:
+    return not app.state.settings.enable_rate_limit
+
+
 def _get_settings(request: Request) -> Settings:
     return request.app.state.settings
 
@@ -81,7 +85,7 @@ class ContactForm(BaseModel):
 
 
 @app.post("/submit", status_code=202)
-@limiter.limit(_rate_limit)
+@limiter.limit(_rate_limit, exempt_when=_is_rate_limit_disabled)
 async def submit(
     request: Request,
     form: ContactForm,

@@ -34,3 +34,11 @@ def rate_limit_client() -> TestClient:
     app.state.settings = make_settings(rate_limit="1/minute")
     app.state.mailer = MagicMock()
     return TestClient(app, raise_server_exceptions=True)
+
+
+@pytest.fixture
+def rate_limit_disabled_client() -> TestClient:
+    limiter._storage.reset()
+    app.state.settings = make_settings(enable_rate_limit=False, rate_limit="1/minute")
+    app.state.mailer = MagicMock()
+    return TestClient(app, raise_server_exceptions=True)

@@ -255,3 +255,11 @@ def test_rate_limit_second_request_is_blocked(rate_limit_client: TestClient) -> 
     rate_limit_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
     r = rate_limit_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
     assert r.status_code == 429
+
+
+def test_rate_limit_disabled_allows_multiple_requests(
+    rate_limit_disabled_client: TestClient,
+) -> None:
+    for _ in range(3):
+        r = rate_limit_disabled_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
+        assert r.status_code == 202

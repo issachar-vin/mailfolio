@@ -7,6 +7,7 @@ def make_settings(
     *,
     valid_origins: list[str] | None = None,
     hcaptcha_secret: str | None = None,
+    enable_rate_limit: bool = True,
     rate_limit: str = "1000/minute",
 ) -> MagicMock:
     """Return a MagicMock that quacks like Settings with sensible test defaults."""
@@ -16,5 +17,6 @@ def make_settings(
     s.gmail_app_password = "secret"
     s.mail_to = "owner@example.com"
     s.hcaptcha_secret = hcaptcha_secret
+    s.enable_rate_limit = enable_rate_limit
     s.rate_limit = rate_limit
     return s
