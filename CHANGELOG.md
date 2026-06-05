@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/issachar-vin/mailfolio/compare/v1.3.0...v1.4.0) (2026-06-05)
+
+
+### Features
+
+* add multipart HTML email template for contact form notifications ([#15](https://github.com/issachar-vin/mailfolio/issues/15)) ([18b25a3](https://github.com/issachar-vin/mailfolio/commit/18b25a326046e8fd7fd5a925a77b2dfa71d867aa))
+
 ## [1.3.0](https://github.com/issachar-vin/mailfolio/compare/v1.2.0...v1.3.0) (2026-06-05)
 
 
