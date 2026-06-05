@@ -98,24 +98,33 @@ All configuration is via environment variables. Create a `.env` file at the proj
 | `GMAIL_USER` | Gmail address used as the sender | `you@gmail.com` |
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password | `abcd efgh ijkl mnop` |
 | `MAIL_TO` | Address that receives contact form emails. Defaults to `GMAIL_USER` when omitted. | `inbox@yourdomain.com` |
-| `VALID_ORIGINS` | Comma-separated allowed origin domains or wildcard patterns | `yourdomain.com,*.staging.yourdomain.com` |
+| `VALID_ORIGINS` | JSON array of allowed origin domains or wildcard patterns | `["yourdomain.com","*.staging.yourdomain.com"]` |
 | `HCAPTCHA_SECRET` | hCaptcha secret key. When set, `/submit` requires a valid `hcaptcha_token` in the request body. Omit to disable hCaptcha entirely. | `0x0000000000000000000000000000000000000000` |
 | `ENABLE_RATE_LIMIT` | Set to `false` to disable per-IP rate limiting. Defaults to `true`. | `false` |
 | `RATE_LIMIT` | [limits](https://limits.readthedocs.io/en/stable/quickstart.html#rate-limit-string-notation) rate limit string applied per IP to `POST /submit`. Only used when `ENABLE_RATE_LIMIT` is `true`. | `5/minute`, `1/5 minutes` |
 
 ### `VALID_ORIGINS` format
 
-Values are bare hostnames or [`fnmatch`](https://docs.python.org/3/library/fnmatch.html) wildcard patterns — **no scheme**:
+Values are bare hostnames or [`fnmatch`](https://docs.python.org/3/library/fnmatch.html) wildcard patterns — **no scheme**.
 
-```
-# exact match
-VALID_ORIGINS=yourdomain.com
+**The value must always be a JSON array**, regardless of how it is passed:
+
+```bash
+# .env file or inline Docker environment variable
+VALID_ORIGINS=["yourdomain.com"]
 
 # wildcard subdomain — matches app.yourdomain.com, www.yourdomain.com, etc.
-VALID_ORIGINS=*.yourdomain.com
+VALID_ORIGINS=["*.yourdomain.com"]
 
 # multiple patterns
-VALID_ORIGINS=yourdomain.com,*.staging.yourdomain.com
+VALID_ORIGINS=["yourdomain.com","*.staging.yourdomain.com"]
+```
+
+In a Docker Compose `environment` block, quote the value to prevent YAML from misinterpreting the brackets:
+
+```yaml
+environment:
+  - 'VALID_ORIGINS=["yourdomain.com","*.staging.yourdomain.com"]'
 ```
 
 Schemes (`https://`) are stripped automatically if you accidentally include them.
