@@ -9,7 +9,21 @@ from mailfolio.main import app
 @pytest.fixture
 def client() -> TestClient:
     settings = MagicMock()
-    settings.valid_origins = ["https://example.com"]
+    settings.valid_origins = ["example.com"]
+    settings.gmail_user = "test@gmail.com"
+    settings.gmail_app_password = "secret"
+    settings.mail_to = "owner@example.com"
+
+    mailer = MagicMock()
+    app.state.settings = settings
+    app.state.mailer = mailer
+    return TestClient(app, raise_server_exceptions=True)
+
+
+@pytest.fixture
+def wildcard_client() -> TestClient:
+    settings = MagicMock()
+    settings.valid_origins = ["*.example.com"]
     settings.gmail_user = "test@gmail.com"
     settings.gmail_app_password = "secret"
     settings.mail_to = "owner@example.com"
@@ -60,3 +74,21 @@ def test_submit_invalid_email(client: TestClient) -> None:
         headers={"Origin": "https://example.com"},
     )
     assert r.status_code == 422
+
+
+def test_submit_wildcard_subdomain(wildcard_client: TestClient) -> None:
+    r = wildcard_client.post(
+        "/submit",
+        json={"name": "Alice", "email": "alice@example.com", "message": "Hello"},
+        headers={"Origin": "https://app.example.com"},
+    )
+    assert r.status_code == 202
+
+
+def test_submit_wildcard_blocks_unrelated(wildcard_client: TestClient) -> None:
+    r = wildcard_client.post(
+        "/submit",
+        json={"name": "Eve", "email": "eve@evil.com", "message": "Attack"},
+        headers={"Origin": "https://evil.com"},
+    )
+    assert r.status_code == 403
