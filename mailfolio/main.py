@@ -6,11 +6,16 @@ from urllib.parse import urlparse
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, EmailStr
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from mailfolio.config import Settings
 from mailfolio.mailer import GmailMailer, Mailer
 
 _HCAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify"
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 def _load_settings() -> Settings:
@@ -26,6 +31,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="mailfolio", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+def _rate_limit(key: str) -> str:
+    return app.state.settings.rate_limit
+
+
+def _is_rate_limit_disabled() -> bool:
+    return not app.state.settings.enable_rate_limit
 
 
 def _get_settings(request: Request) -> Settings:
@@ -70,9 +85,10 @@ class ContactForm(BaseModel):
 
 
 @app.post("/submit", status_code=202)
+@limiter.limit(_rate_limit, exempt_when=_is_rate_limit_disabled)
 async def submit(
-    form: ContactForm,
     request: Request,
+    form: ContactForm,
     settings: Settings = Depends(_get_settings),
     mailer: Mailer = Depends(_get_mailer),
 ) -> dict[str, str]:

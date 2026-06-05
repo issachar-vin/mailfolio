@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # the request body and verifies it against the hCaptcha siteverify API.
     # Omit to disable hCaptcha entirely.
     hcaptcha_secret: str | None = None
+    enable_rate_limit: bool = True
+    # limits-style rate limit string applied per IP to POST /submit.
+    # Examples: "1/minute", "10/hour", "1/5 minutes"
+    rate_limit: str = "1/minute"
 
     @model_validator(mode="after")
     def _default_mail_to(self) -> Self:

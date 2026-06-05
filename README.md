@@ -8,6 +8,9 @@ A lightweight FastAPI microservice that receives contact form submissions and de
 
 ## Docker quick start
 
+<details open>
+<summary>Minimal</summary>
+
 ```yaml
 services:
   mailfolio:
@@ -21,7 +24,10 @@ services:
       VALID_ORIGINS: yourdomain.com
 ```
 
-With hCaptcha enabled and multiple allowed origins:
+</details>
+
+<details>
+<summary>With all optional features enabled</summary>
 
 ```yaml
 services:
@@ -32,12 +38,38 @@ services:
     environment:
       GMAIL_USER: you@gmail.com
       GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      # MAIL_TO is optional — omit it to deliver to GMAIL_USER
       MAIL_TO: inbox@yourdomain.com
       VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
       HCAPTCHA_SECRET: your-hcaptcha-secret-key
+      # ENABLE_RATE_LIMIT defaults to true — no need to set it unless disabling
+      RATE_LIMIT: 3/minute
 ```
 
-Or with an env file:
+</details>
+
+<details>
+<summary>With rate limiting disabled</summary>
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      # MAIL_TO is optional — omit it to deliver to GMAIL_USER
+      MAIL_TO: inbox@yourdomain.com
+      VALID_ORIGINS: yourdomain.com
+      ENABLE_RATE_LIMIT: "false"
+```
+
+</details>
+
+<details>
+<summary>Using an env file</summary>
 
 ```yaml
 services:
@@ -48,6 +80,8 @@ services:
     env_file:
       - .env
 ```
+
+</details>
 
 ## Requirements
 
@@ -66,6 +100,8 @@ All configuration is via environment variables. Create a `.env` file at the proj
 | `MAIL_TO` | Address that receives contact form emails. Defaults to `GMAIL_USER` when omitted. | `inbox@yourdomain.com` |
 | `VALID_ORIGINS` | Comma-separated allowed origin domains or wildcard patterns | `yourdomain.com,*.staging.yourdomain.com` |
 | `HCAPTCHA_SECRET` | hCaptcha secret key. When set, `/submit` requires a valid `hcaptcha_token` in the request body. Omit to disable hCaptcha entirely. | `0x0000000000000000000000000000000000000000` |
+| `ENABLE_RATE_LIMIT` | Set to `false` to disable per-IP rate limiting. Defaults to `true`. | `false` |
+| `RATE_LIMIT` | [limits](https://limits.readthedocs.io/en/stable/quickstart.html#rate-limit-string-notation) rate limit string applied per IP to `POST /submit`. Only used when `ENABLE_RATE_LIMIT` is `true`. | `5/minute`, `1/5 minutes` |
 
 ### `VALID_ORIGINS` format
 
@@ -124,6 +160,7 @@ Submit a contact form message.
 | `202` | Message sent — `{"status": "sent"}` |
 | `403` | Request `Origin` not in `VALID_ORIGINS`, or hCaptcha verification failed |
 | `422` | Validation error (bad email, missing fields, missing `hcaptcha_token` when required) |
+| `429` | Rate limit exceeded (see `RATE_LIMIT`) |
 
 ### `GET /health`
 
