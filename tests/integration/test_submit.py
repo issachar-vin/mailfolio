@@ -239,3 +239,19 @@ def test_hcaptcha_enabled_truthy_invalid_token_returns_403(
             headers=_VALID_HEADERS,
         )
     assert r.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting
+# ---------------------------------------------------------------------------
+
+
+def test_rate_limit_first_request_succeeds(rate_limit_client: TestClient) -> None:
+    r = rate_limit_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
+    assert r.status_code == 202
+
+
+def test_rate_limit_second_request_is_blocked(rate_limit_client: TestClient) -> None:
+    rate_limit_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
+    r = rate_limit_client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
+    assert r.status_code == 429
