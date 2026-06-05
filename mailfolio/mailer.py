@@ -1,10 +1,10 @@
 import smtplib
-from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
 from typing import Protocol
 
 
 class Mailer(Protocol):
-    def send(self, *, to: str, subject: str, body: str, reply_to: str | None = None) -> None: ...
+    def send(self, *, to: str, msg: MIMEMultipart) -> None: ...
 
 
 class GmailMailer:
@@ -15,14 +15,9 @@ class GmailMailer:
         self._user = user
         self._app_password = app_password
 
-    def send(self, *, to: str, subject: str, body: str, reply_to: str | None = None) -> None:
-        msg = EmailMessage()
+    def send(self, *, to: str, msg: MIMEMultipart) -> None:
         msg["From"] = self._user
         msg["To"] = to
-        msg["Subject"] = subject
-        if reply_to:
-            msg["Reply-To"] = reply_to
-        msg.set_content(body)
 
         with smtplib.SMTP(self._SMTP_HOST, self._SMTP_PORT) as smtp:
             smtp.ehlo()
