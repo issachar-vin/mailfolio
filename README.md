@@ -6,6 +6,49 @@ A lightweight FastAPI microservice that receives contact form submissions and de
 
 `POST /submit` accepts a JSON payload, validates the request `Origin` header against a configurable allowlist, then sends the message as an email using a Gmail App Password. Origin patterns support wildcards (e.g. `*.example.com`).
 
+## Docker quick start
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      MAIL_TO: inbox@yourdomain.com
+      VALID_ORIGINS: yourdomain.com
+```
+
+With hCaptcha enabled and multiple allowed origins:
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      MAIL_TO: inbox@yourdomain.com
+      VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
+      HCAPTCHA_SECRET: your-hcaptcha-secret-key
+```
+
+Or with an env file:
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+```
+
 ## Requirements
 
 - Python 3.12+
