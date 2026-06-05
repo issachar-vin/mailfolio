@@ -35,6 +35,7 @@ services:
       MAIL_TO: inbox@yourdomain.com
       VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
       HCAPTCHA_SECRET: your-hcaptcha-secret-key
+      ENABLE_RATE_LIMIT: "true"   # set to "false" to disable
       RATE_LIMIT: 3/minute
 ```
 
