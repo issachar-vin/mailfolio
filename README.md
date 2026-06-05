@@ -22,6 +22,7 @@ All configuration is via environment variables. Create a `.env` file at the proj
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password | `abcd efgh ijkl mnop` |
 | `MAIL_TO` | Address that receives contact form emails | `inbox@yourdomain.com` |
 | `VALID_ORIGINS` | Comma-separated allowed origin domains or wildcard patterns | `yourdomain.com,*.staging.yourdomain.com` |
+| `HCAPTCHA_SECRET` | hCaptcha secret key. When set, `/submit` requires a valid `hcaptcha_token` in the request body. Omit to disable hCaptcha entirely. | `0x0000000000000000000000000000000000000000` |
 
 ### `VALID_ORIGINS` format
 
@@ -71,14 +72,15 @@ Submit a contact form message.
 | `email` | email address | yes | — |
 | `message` | string | yes | — |
 | `subject` | string | no | `"Contact form submission"` |
+| `hcaptcha_token` | string | only when `HCAPTCHA_SECRET` is set | — |
 
 **Responses:**
 
 | Status | Meaning |
 |---|---|
 | `202` | Message sent — `{"status": "sent"}` |
-| `403` | Request `Origin` not in `VALID_ORIGINS` |
-| `422` | Validation error (bad email, missing fields) |
+| `403` | Request `Origin` not in `VALID_ORIGINS`, or hCaptcha verification failed |
+| `422` | Validation error (bad email, missing fields, missing `hcaptcha_token` when required) |
 
 ### `GET /health`
 
