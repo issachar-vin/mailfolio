@@ -21,7 +21,7 @@ services:
       VALID_ORIGINS: yourdomain.com
 ```
 
-With hCaptcha enabled and multiple allowed origins:
+With all optional features enabled:
 
 ```yaml
 services:
@@ -35,6 +35,7 @@ services:
       MAIL_TO: inbox@yourdomain.com
       VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
       HCAPTCHA_SECRET: your-hcaptcha-secret-key
+      RATE_LIMIT: 3/minute
 ```
 
 Or with an env file:
