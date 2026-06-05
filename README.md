@@ -63,7 +63,7 @@ All configuration is via environment variables. Create a `.env` file at the proj
 |---|---|---|
 | `GMAIL_USER` | Gmail address used as the sender | `you@gmail.com` |
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password | `abcd efgh ijkl mnop` |
-| `MAIL_TO` | Address that receives contact form emails | `inbox@yourdomain.com` |
+| `MAIL_TO` | Address that receives contact form emails. Defaults to `GMAIL_USER` when omitted. | `inbox@yourdomain.com` |
 | `VALID_ORIGINS` | Comma-separated allowed origin domains or wildcard patterns | `yourdomain.com,*.staging.yourdomain.com` |
 | `HCAPTCHA_SECRET` | hCaptcha secret key. When set, `/submit` requires a valid `hcaptcha_token` in the request body. Omit to disable hCaptcha entirely. | `0x0000000000000000000000000000000000000000` |
 

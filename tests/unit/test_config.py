@@ -67,3 +67,22 @@ class TestParseOrigins:
     )
     def test_mixed_inputs(self, raw: str | list[str], expected: list[str]) -> None:
         assert Settings.parse_origins(raw) == expected
+
+
+class TestMailToDefault:
+    def test_defaults_to_gmail_user_when_omitted(self) -> None:
+        s = Settings(
+            valid_origins=["example.com"],
+            gmail_user="sender@gmail.com",
+            gmail_app_password="secret",
+        )
+        assert s.mail_to == "sender@gmail.com"
+
+    def test_uses_explicit_mail_to_when_provided(self) -> None:
+        s = Settings(
+            valid_origins=["example.com"],
+            gmail_user="sender@gmail.com",
+            gmail_app_password="secret",
+            mail_to="inbox@other.com",
+        )
+        assert s.mail_to == "inbox@other.com"

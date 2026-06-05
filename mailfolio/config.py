@@ -1,4 +1,6 @@
-from pydantic import field_validator
+from typing import Self
+
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,11 +21,18 @@ class Settings(BaseSettings):
     valid_origins: list[str]
     gmail_user: str
     gmail_app_password: str
-    mail_to: str
+    # Defaults to gmail_user when omitted.
+    mail_to: str | None = None
     # hCaptcha secret key. When set, /submit requires a valid hcaptcha_token in
     # the request body and verifies it against the hCaptcha siteverify API.
     # Omit to disable hCaptcha entirely.
     hcaptcha_secret: str | None = None
+
+    @model_validator(mode="after")
+    def _default_mail_to(self) -> Self:
+        if not self.mail_to:
+            self.mail_to = self.gmail_user
+        return self
 
     @field_validator("valid_origins", mode="before")
     @classmethod
