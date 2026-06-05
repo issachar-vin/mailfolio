@@ -35,8 +35,23 @@ services:
       MAIL_TO: inbox@yourdomain.com
       VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
       HCAPTCHA_SECRET: your-hcaptcha-secret-key
-      ENABLE_RATE_LIMIT: "true"   # set to "false" to disable
+      # ENABLE_RATE_LIMIT defaults to true — no need to set it unless disabling
       RATE_LIMIT: 3/minute
+```
+
+With rate limiting disabled:
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      VALID_ORIGINS: yourdomain.com
+      ENABLE_RATE_LIMIT: "false"
 ```
 
 Or with an env file:
