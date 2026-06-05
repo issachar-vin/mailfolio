@@ -6,6 +6,49 @@ A lightweight FastAPI microservice that receives contact form submissions and de
 
 `POST /submit` accepts a JSON payload, validates the request `Origin` header against a configurable allowlist, then sends the message as an email using a Gmail App Password. Origin patterns support wildcards (e.g. `*.example.com`).
 
+## Docker quick start
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      MAIL_TO: inbox@yourdomain.com
+      VALID_ORIGINS: yourdomain.com
+```
+
+With hCaptcha enabled and multiple allowed origins:
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    environment:
+      GMAIL_USER: you@gmail.com
+      GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      MAIL_TO: inbox@yourdomain.com
+      VALID_ORIGINS: yourdomain.com,*.staging.yourdomain.com
+      HCAPTCHA_SECRET: your-hcaptcha-secret-key
+```
+
+Or with an env file:
+
+```yaml
+services:
+  mailfolio:
+    image: ghcr.io/issachar-vin/mailfolio:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+```
+
 ## Requirements
 
 - Python 3.12+
@@ -20,8 +63,9 @@ All configuration is via environment variables. Create a `.env` file at the proj
 |---|---|---|
 | `GMAIL_USER` | Gmail address used as the sender | `you@gmail.com` |
 | `GMAIL_APP_PASSWORD` | 16-character Gmail App Password | `abcd efgh ijkl mnop` |
-| `MAIL_TO` | Address that receives contact form emails | `inbox@yourdomain.com` |
+| `MAIL_TO` | Address that receives contact form emails. Defaults to `GMAIL_USER` when omitted. | `inbox@yourdomain.com` |
 | `VALID_ORIGINS` | Comma-separated allowed origin domains or wildcard patterns | `yourdomain.com,*.staging.yourdomain.com` |
+| `HCAPTCHA_SECRET` | hCaptcha secret key. When set, `/submit` requires a valid `hcaptcha_token` in the request body. Omit to disable hCaptcha entirely. | `0x0000000000000000000000000000000000000000` |
 
 ### `VALID_ORIGINS` format
 
@@ -71,14 +115,15 @@ Submit a contact form message.
 | `email` | email address | yes | — |
 | `message` | string | yes | — |
 | `subject` | string | no | `"Contact form submission"` |
+| `hcaptcha_token` | string | only when `HCAPTCHA_SECRET` is set | — |
 
 **Responses:**
 
 | Status | Meaning |
 |---|---|
 | `202` | Message sent — `{"status": "sent"}` |
-| `403` | Request `Origin` not in `VALID_ORIGINS` |
-| `422` | Validation error (bad email, missing fields) |
+| `403` | Request `Origin` not in `VALID_ORIGINS`, or hCaptcha verification failed |
+| `422` | Validation error (bad email, missing fields, missing `hcaptcha_token` when required) |
 
 ### `GET /health`
 
