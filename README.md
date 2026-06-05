@@ -8,6 +8,9 @@ A lightweight FastAPI microservice that receives contact form submissions and de
 
 ## Docker quick start
 
+<details>
+<summary>Minimal</summary>
+
 ```yaml
 services:
   mailfolio:
@@ -22,7 +25,10 @@ services:
       VALID_ORIGINS: yourdomain.com
 ```
 
-With all optional features enabled:
+</details>
+
+<details>
+<summary>With all optional features enabled</summary>
 
 ```yaml
 services:
@@ -41,7 +47,10 @@ services:
       RATE_LIMIT: 3/minute
 ```
 
-With rate limiting disabled:
+</details>
+
+<details>
+<summary>With rate limiting disabled</summary>
 
 ```yaml
 services:
@@ -58,7 +67,10 @@ services:
       ENABLE_RATE_LIMIT: "false"
 ```
 
-Or with an env file:
+</details>
+
+<details>
+<summary>Using an env file</summary>
 
 ```yaml
 services:
@@ -69,6 +81,8 @@ services:
     env_file:
       - .env
 ```
+
+</details>
 
 ## Requirements
 
