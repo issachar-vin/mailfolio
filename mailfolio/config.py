@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     gmail_user: str
     gmail_app_password: str
     mail_to: str
+    # hCaptcha secret key. When set, /submit requires a valid hcaptcha_token in
+    # the request body and verifies it against the hCaptcha siteverify API.
+    # Omit to disable hCaptcha entirely.
+    hcaptcha_secret: str | None = None
 
     @field_validator("valid_origins", mode="before")
     @classmethod

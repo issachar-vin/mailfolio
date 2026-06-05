@@ -3,11 +3,14 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 
 from mailfolio.config import Settings
 from mailfolio.mailer import GmailMailer, Mailer
+
+_HCAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify"
 
 
 def _load_settings() -> Settings:
@@ -48,11 +51,22 @@ def _is_allowed(origin: str, valid_origins: list[str]) -> bool:
     return any(fnmatch.fnmatch(hostname, pattern) for pattern in valid_origins)
 
 
+async def _verify_hcaptcha(token: str, secret: str) -> bool:
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            _HCAPTCHA_VERIFY_URL,
+            data={"secret": secret, "response": token},
+        )
+        return bool(resp.json().get("success", False))
+
+
 class ContactForm(BaseModel):
     name: str
     email: EmailStr
     subject: str = "Contact form submission"
     message: str
+    # Required when hCaptcha is enabled (HCAPTCHA_SECRET set in env). Ignored otherwise.
+    hcaptcha_token: str | None = None
 
 
 @app.post("/submit", status_code=202)
@@ -65,6 +79,12 @@ async def submit(
     origin = request.headers.get("origin", "")
     if not _is_allowed(origin, settings.valid_origins):
         raise HTTPException(status_code=403, detail="Origin not allowed")
+
+    if settings.hcaptcha_secret:
+        if not form.hcaptcha_token:
+            raise HTTPException(status_code=422, detail="hCaptcha token required")
+        if not await _verify_hcaptcha(form.hcaptcha_token, settings.hcaptcha_secret):
+            raise HTTPException(status_code=403, detail="hCaptcha verification failed")
 
     body = f"Name: {form.name}\nEmail: {form.email}\n\n{form.message}"
     mailer.send(
