@@ -128,20 +128,20 @@ def test_custom_subject_is_forwarded(client: TestClient) -> None:
         json={**_VALID_FORM, "subject": "Custom Subject"},
         headers=_VALID_HEADERS,
     )
-    call_kwargs = app.state.mailer.send.call_args.kwargs
-    assert call_kwargs["subject"] == "Custom Subject"
+    msg = app.state.mailer.send.call_args.kwargs["msg"]
+    assert msg["Subject"] == "Custom Subject"
 
 
 def test_default_subject_is_used_when_omitted(client: TestClient) -> None:
     client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
-    call_kwargs = app.state.mailer.send.call_args.kwargs
-    assert call_kwargs["subject"] == "Contact form submission"
+    msg = app.state.mailer.send.call_args.kwargs["msg"]
+    assert msg["Subject"] == "Contact form submission"
 
 
 def test_reply_to_is_set_to_sender_email(client: TestClient) -> None:
     client.post("/submit", json=_VALID_FORM, headers=_VALID_HEADERS)
-    call_kwargs = app.state.mailer.send.call_args.kwargs
-    assert call_kwargs["reply_to"] == "alice@example.com"
+    msg = app.state.mailer.send.call_args.kwargs["msg"]
+    assert msg["Reply-To"] == "alice@example.com"
 
 
 def test_email_body_contains_name_and_message(client: TestClient) -> None:
@@ -150,9 +150,14 @@ def test_email_body_contains_name_and_message(client: TestClient) -> None:
         json={"name": "Bob", "email": "bob@example.com", "message": "Hi there"},
         headers=_VALID_HEADERS,
     )
-    call_kwargs = app.state.mailer.send.call_args.kwargs
-    assert "Bob" in call_kwargs["body"]
-    assert "Hi there" in call_kwargs["body"]
+    msg = app.state.mailer.send.call_args.kwargs["msg"]
+    plain = next(
+        p.get_payload(decode=True).decode()
+        for p in msg.walk()
+        if p.get_content_type() == "text/plain"
+    )
+    assert "Bob" in plain
+    assert "Hi there" in plain
 
 
 # ---------------------------------------------------------------------------

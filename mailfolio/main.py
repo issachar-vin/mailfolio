@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from mailfolio.config import Settings
+from mailfolio.email_template import build_contact_email
 from mailfolio.mailer import GmailMailer, Mailer
 
 _HCAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify"
@@ -132,13 +133,8 @@ async def submit(
         if not await _verify_hcaptcha(form.hcaptcha_token, settings.hcaptcha_secret):
             raise HTTPException(status_code=403, detail="hCaptcha verification failed")
 
-    body = f"Name: {form.name}\nEmail: {form.email}\n\n{form.message}"
-    mailer.send(
-        to=settings.mail_to,
-        subject=form.subject,
-        body=body,
-        reply_to=form.email,
-    )
+    msg = build_contact_email(form.name, form.email, form.subject, form.message)
+    mailer.send(to=settings.mail_to, msg=msg)
     return {"status": "sent"}
 
 
