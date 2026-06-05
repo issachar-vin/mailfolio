@@ -52,6 +52,8 @@ services:
     environment:
       GMAIL_USER: you@gmail.com
       GMAIL_APP_PASSWORD: abcd efgh ijkl mnop
+      # MAIL_TO is optional — omit it to deliver to GMAIL_USER
+      MAIL_TO: inbox@yourdomain.com
       VALID_ORIGINS: yourdomain.com
       ENABLE_RATE_LIMIT: "false"
 ```
