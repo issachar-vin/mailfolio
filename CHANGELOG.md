@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/issachar-vin/mailfolio/compare/v1.2.0...v1.3.0) (2026-06-05)
+
+
+### Features
+
+* add CORS middleware for preflight support ([#12](https://github.com/issachar-vin/mailfolio/issues/12)) ([bd0b4e8](https://github.com/issachar-vin/mailfolio/commit/bd0b4e8a2912716345f7d5690974c20428903859))
+
 ## [1.2.0](https://github.com/issachar-vin/mailfolio/compare/v1.1.1...v1.2.0) (2026-06-05)
 
 
