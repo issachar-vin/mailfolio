@@ -75,6 +75,15 @@ def _get_mailer(request: Request) -> Mailer:
     return request.app.state.mailer
 
 
+def _require_allowed_origin(
+    request: Request,
+    settings: Settings = Depends(_get_settings),
+) -> None:
+    origin = request.headers.get("origin", "")
+    if not _is_allowed(origin, settings.valid_origins):
+        raise HTTPException(status_code=403, detail="Origin not allowed")
+
+
 def _origin_hostname(origin: str) -> str:
     # urlparse extracts netloc from a full URL ("https://example.com" → "example.com").
     # A bare hostname with no scheme is returned unchanged.
@@ -115,11 +124,8 @@ async def submit(
     form: ContactForm,
     settings: Settings = Depends(_get_settings),
     mailer: Mailer = Depends(_get_mailer),
+    _: None = Depends(_require_allowed_origin),
 ) -> dict[str, str]:
-    origin = request.headers.get("origin", "")
-    if not _is_allowed(origin, settings.valid_origins):
-        raise HTTPException(status_code=403, detail="Origin not allowed")
-
     if settings.hcaptcha_secret:
         if not form.hcaptcha_token:
             raise HTTPException(status_code=422, detail="hCaptcha token required")
