@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/issachar-vin/mailfolio/compare/v1.1.1...v1.2.0) (2026-06-05)
+
+
+### Features
+
+* add per-IP rate limiting configurable via env var ([#9](https://github.com/issachar-vin/mailfolio/issues/9)) ([5e6f63a](https://github.com/issachar-vin/mailfolio/commit/5e6f63aee452fbdf72ffdc16757b4348dbe7c636))
+
 ## [1.1.1](https://github.com/issachar-vin/mailfolio/compare/v1.1.0...v1.1.1) (2026-06-05)
 
 
